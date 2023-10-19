@@ -7,15 +7,21 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Xml;
 using System.Runtime.ConstrainedExecution;
+using UtilityLib;
 
 namespace EsercizioLogin.User
 {
     internal class UserManager
     {
         int id = 0;
+
         PasswordGen passwordGen = new PasswordGen();
+
         bool close = false;
 
+        Utility utility = new Utility();
+
+        Utility.DataLog dataLog = new Utility.DataLog();
         public void loginUser(List<User> listUsers)
         {
             Console.Clear();
@@ -129,8 +135,10 @@ namespace EsercizioLogin.User
                     int userId = id;
                     User user = new User(userId, userNameChoose, encPasswordChoose);
 
+
                     try
                     {
+                    throw new Exception("Test errore.");
                     listUsers.Add(user);
 
                     XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
@@ -152,17 +160,23 @@ namespace EsercizioLogin.User
                         }
                     }
 
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("Registrazione completata");
+                        Console.ForegroundColor = ConsoleColor.White;
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        dataLog = new Utility.DataLog
+                            (
+                            dataLog.ClassName = this.GetType().Name, dataLog.MethodName = MethodBase.GetCurrentMethod().Name, dataLog.DateTimeLog = DateTime.Now,
+                            dataLog.ErrorCode = ex.HResult, dataLog.ErrorMessage = ex.Message, dataLog.InnerExcept = ex.InnerException != null ? ex.InnerException.ToString() : ""
+                            );
+                        dataLog.WriteLogEvent( dataLog );
+                        Console.WriteLine($"è stato riscontrato il seguente errore: {ex.Message}");
                     }
 
                     Console.Clear();
 
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("Registrazione completata");
-                    Console.ForegroundColor = ConsoleColor.White;
 
                     close = true;
                 }

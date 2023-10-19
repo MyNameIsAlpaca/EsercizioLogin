@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using UtilityLib;
 
 
 namespace EsercizioLogin
@@ -25,6 +26,8 @@ namespace EsercizioLogin
 
             XmlSerializer serializer = new XmlSerializer(typeof(List<User.User>));
 
+            Utility utility = new Utility();
+
             if (File.Exists(filePath))
             {
                 userList.listUsers = new List<User.User>();
@@ -35,7 +38,6 @@ namespace EsercizioLogin
                 }
             }
 
-            utility utilityTool = new utility();
 
             UserManager userManager = new UserManager();
 
@@ -48,7 +50,7 @@ namespace EsercizioLogin
                 Console.WriteLine("");
                 Console.WriteLine("Sei già registrato?\n1) Si\n2) No\n3) Esci");
                 string userChoose = Console.ReadLine();
-                if (utilityTool.testInt(userChoose))
+                if (utility.testInt(userChoose))
                 {
                     switch(userChoose)
                     {

@@ -12,73 +12,163 @@ namespace EsercizioLogin.User
 {
     internal class UserManager
     {
-
         int id = 0;
-
         utility utility = new utility();
-
         PasswordGen passwordGen = new PasswordGen();
+        bool close = false;
 
         public void loginUser(List<User> listUsers)
         {
-            Console.WriteLine(listUsers.Count);
-            Console.ReadLine();
+            Console.Clear();
+            while (!close)
+            {
+                Console.WriteLine("");
+                Console.WriteLine("== Login ==");
+                Console.WriteLine("");
+                Console.WriteLine("Inserisci il tuo nome utente oppure premi f per tornare indietro");
+                string userName = Console.ReadLine();
+
+                if (userName.ToLower() == "f")
+                {
+                    Console.Clear();
+                    close = true;
+                }
+                else
+                {
+                    var userTryLogin = listUsers.SingleOrDefault(r => r.UserName.ToLower() == userName.ToLower());
+
+                    if (userTryLogin != null)
+                    {
+                        Console.Clear();
+                        while (!close)
+                        {
+                            Console.WriteLine("Inserisci la password oppure premi f per tornare indietro");
+                            string password = Console.ReadLine();
+
+                            if (password.ToLower() == "f")
+                            {
+                                Console.Clear();
+                                close = true;
+                            }
+                            else
+                            {
+                                string EncPassword = passwordGen.PasswordEnc(password);
+
+                                if (EncPassword == userTryLogin.Password)
+                                {
+                                    Console.WriteLine("Sei loggato");
+                                    Console.ReadLine();
+                                    Console.Clear();
+                                    close = true;
+                                }
+                                else
+                                {
+                                    Console.Clear();
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine("Password non corretta, riprova");
+                                    Console.ForegroundColor = ConsoleColor.White;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Utente non trovato, riprova");
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                }
+            }
+            close = false;
         }
 
         public void createUser(List<User> listUsers)
         {
-            string relPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            bool close = false;
 
+            string relPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string filePath = Path.Combine(relPath, "DataUser", "userList.xml");
 
-            Console.WriteLine("|=================|");
-            Console.WriteLine("|| Registrazione ||");
-            Console.WriteLine("|=================|");
-
-            Console.WriteLine("Inserisci un nome utente");
-
-            string userNameChoose = Console.ReadLine();
-
-            Console.WriteLine("Scegli una password");
-
-            string userPasswordChoose = Console.ReadLine();
-
-            string encPasswordChoose = passwordGen.PasswordEnc(userPasswordChoose);
-
-            id++;
-
-            int userId = id;
-
-            User user = new User(userId, userNameChoose, encPasswordChoose);
-
-            Console.WriteLine("Registrazione completata");
-
-            XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
-
-            if (File.Exists(filePath))
+            Console.Clear();
+            while (!close)
             {
-                using (StreamReader xmlFile = new StreamReader(filePath))
+
+                Console.WriteLine("");
+                Console.WriteLine("== Registrazione ==");
+                Console.WriteLine("");
+
+
+                Console.WriteLine("Inserisci un nome utente oppure inserisci f per tornare indietro");
+
+                string userNameChoose = Console.ReadLine();
+
+                if(userNameChoose.ToLower() == "f")
                 {
-                    listUsers = (List<User>)serializer.Deserialize(xmlFile);
+                    Console.Clear();
+                    return;
                 }
 
-                listUsers.Add(user);
+                var userTryRegister = listUsers.SingleOrDefault(r => r.UserName.ToLower() == userNameChoose.ToLower());
 
-                using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
+                if(userTryRegister != null)
                 {
-                    serializer.Serialize(sw, listUsers);
+                    Console.Clear();
+                    Console.ForegroundColor= ConsoleColor.Red;
+                    Console.WriteLine("Questo nome utente esiste già, riprova");
+                    Console.ForegroundColor = ConsoleColor.White;
+                }
+                else
+                {
+                    Console.Clear();
+                    Console.WriteLine("Scegli una password");
+                    string userPasswordChoose = Console.ReadLine();
+
+                    string encPasswordChoose = passwordGen.PasswordEnc(userPasswordChoose);
+                    id++;
+
+                    int userId = id;
+                    User user = new User(userId, userNameChoose, encPasswordChoose);
+
+                    try
+                    {
+                    listUsers.Add(user);
+
+                    XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
+
+                    if (File.Exists(filePath))
+                    {
+
+                        using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
+                        {
+                            serializer.Serialize(sw, listUsers);
+                        }
+                    }
+                    else
+                    {
+
+                        using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
+                        {
+                            serializer.Serialize(sw, listUsers);
+                        }
+                    }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+
+                    Console.Clear();
+
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Registrazione completata");
+                    Console.ForegroundColor = ConsoleColor.White;
+
+                    close = true;
                 }
             }
-            else
-            {
-                listUsers.Add(user);
 
-                using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
-                {
-                    serializer.Serialize(sw, listUsers);
-                }
-
-            }
 
         }
     }

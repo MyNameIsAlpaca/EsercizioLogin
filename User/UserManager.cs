@@ -13,7 +13,6 @@ namespace EsercizioLogin.User
     internal class UserManager
     {
         int id = 0;
-        utility utility = new utility();
         PasswordGen passwordGen = new PasswordGen();
         bool close = false;
 

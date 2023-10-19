@@ -66,8 +66,12 @@ namespace EsercizioLogin
 
                             break;
 
-                        default:
+                        case "3":
                             close = true;
+                            break;
+                        default:
+                            Console.Clear();
+                            utility.errorStyle("Scegli un'opzione valida");
                             break;
                         
                     }
@@ -75,7 +79,7 @@ namespace EsercizioLogin
                 else
                 {
                     Console.Clear();
-                    Console.WriteLine("Scegli un'opzione valida");
+                    utility.errorStyle("Scegli un'opzione valida");
                 }
             }
         }

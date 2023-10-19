@@ -21,7 +21,8 @@ namespace EsercizioLogin.User
 
         Utility utility = new Utility();
 
-        Utility.DataLog dataLog = new Utility.DataLog();
+        Utility.ErrorLog errorLog = new Utility.ErrorLog();
+
         public void loginUser(List<User> listUsers)
         {
             Console.Clear();
@@ -69,9 +70,7 @@ namespace EsercizioLogin.User
                                 else
                                 {
                                     Console.Clear();
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.WriteLine("Password non corretta, riprova");
-                                    Console.ForegroundColor = ConsoleColor.White;
+                                    utility.errorStyle("Password non corretta, riprova");
                                 }
                             }
                         }
@@ -79,9 +78,7 @@ namespace EsercizioLogin.User
                     else
                     {
                         Console.Clear();
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Utente non trovato, riprova");
-                        Console.ForegroundColor = ConsoleColor.White;
+                        utility.errorStyle("Utente non trovato, riprova");
                     }
                 }
             }
@@ -138,7 +135,6 @@ namespace EsercizioLogin.User
 
                     try
                     {
-                    throw new Exception("Test errore.");
                     listUsers.Add(user);
 
                     XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
@@ -159,19 +155,23 @@ namespace EsercizioLogin.User
                             serializer.Serialize(sw, listUsers);
                         }
                     }
+                        Utility.DataLog dataLog = new Utility.DataLog(this.GetType().Name, MethodBase.GetCurrentMethod().Name, DateTime.Now);
+
+                        utility.WriteDataEvent(dataLog);
 
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("Registrazione completata");
                         Console.ForegroundColor = ConsoleColor.White;
+
                     }
                     catch (Exception ex)
                     {
-                        dataLog = new Utility.DataLog
+                        errorLog = new Utility.ErrorLog
                             (
-                            dataLog.ClassName = this.GetType().Name, dataLog.MethodName = MethodBase.GetCurrentMethod().Name, dataLog.DateTimeLog = DateTime.Now,
-                            dataLog.ErrorCode = ex.HResult, dataLog.ErrorMessage = ex.Message, dataLog.InnerExcept = ex.InnerException != null ? ex.InnerException.ToString() : ""
+                            errorLog.ClassName = this.GetType().Name, errorLog.MethodName = MethodBase.GetCurrentMethod().Name, errorLog.DateTimeLog = DateTime.Now,
+                            errorLog.ErrorCode = ex.HResult, errorLog.ErrorMessage = ex.Message, errorLog.InnerExcept = ex.InnerException != null ? ex.InnerException.ToString() : ""
                             );
-                        dataLog.WriteLogEvent( dataLog );
+                        errorLog.WriteErrorEvent( errorLog );
                         Console.WriteLine($"è stato riscontrato il seguente errore: {ex.Message}");
                     }
 

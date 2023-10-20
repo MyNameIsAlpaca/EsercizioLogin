@@ -13,14 +13,10 @@ namespace EsercizioLogin.User
 {
     internal class UserManager
     {
-        int id = 0;
 
         PasswordGen passwordGen = new PasswordGen();
-
         bool close = false;
-
         Utility utility = new Utility();
-
         Utility.ErrorLog errorLog = new Utility.ErrorLog();
 
         public void loginUser(List<User> listUsers)
@@ -91,21 +87,20 @@ namespace EsercizioLogin.User
 
             string relPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string filePath = Path.Combine(relPath, "DataUser", "userList.xml");
+            string registerLog = Path.Combine(relPath, "RegisterLog.txt");
+            string errorLogPath = Path.Combine(relPath, "ErrorLog.txt");
 
             Console.Clear();
             while (!close)
             {
-
                 Console.WriteLine("");
                 Console.WriteLine("== Registrazione ==");
                 Console.WriteLine("");
 
-
                 Console.WriteLine("Inserisci un nome utente oppure inserisci f per tornare indietro");
-
                 string userNameChoose = Console.ReadLine();
 
-                if(userNameChoose.ToLower() == "f")
+                if (userNameChoose.ToLower() == "f")
                 {
                     Console.Clear();
                     return;
@@ -113,10 +108,10 @@ namespace EsercizioLogin.User
 
                 var userTryRegister = listUsers.SingleOrDefault(r => r.UserName.ToLower() == userNameChoose.ToLower());
 
-                if(userTryRegister != null)
+                if (userTryRegister != null)
                 {
                     Console.Clear();
-                    Console.ForegroundColor= ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Questo nome utente esiste già, riprova");
                     Console.ForegroundColor = ConsoleColor.White;
                 }
@@ -127,62 +122,63 @@ namespace EsercizioLogin.User
                     string userPasswordChoose = Console.ReadLine();
 
                     string encPasswordChoose = passwordGen.PasswordEnc(userPasswordChoose);
-                    id++;
+                    int userId;
 
-                    int userId = id;
-                    User user = new User(userId, userNameChoose, encPasswordChoose);
-
-
-                    try
+                    if (listUsers.Count > 0)
                     {
-                    listUsers.Add(user);
-
-                    XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
-
-                    if (File.Exists(filePath))
-                    {
-
-                        using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
-                        {
-                            serializer.Serialize(sw, listUsers);
-                        }
+                        userId = listUsers[listUsers.Count - 1].id + 1;
                     }
                     else
                     {
-
-                        using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
-                        {
-                            serializer.Serialize(sw, listUsers);
-                        }
+                        userId = 1;
                     }
-                        Utility.DataLog dataLog = new Utility.DataLog(this.GetType().Name, MethodBase.GetCurrentMethod().Name, DateTime.Now);
 
-                        utility.WriteDataEvent(dataLog);
+                    User user = new User(userId, userNameChoose, encPasswordChoose);
+
+                    try
+                    {
+                        listUsers.Add(user);
+                        XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
+
+                        if (File.Exists(filePath))
+                        {
+                            using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
+                            {
+                                serializer.Serialize(sw, listUsers);
+                            }
+                        }
+                        else
+                        {
+                            using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
+                            {
+                                serializer.Serialize(sw, listUsers);
+                            }
+                        }
+
+                        Utility.DataLog dataLog = new Utility.DataLog(this.GetType().Name, MethodBase.GetCurrentMethod().Name, DateTime.Now);
+                        utility.WriteDataEvent(dataLog, registerLog, userNameChoose);
+                        Console.Clear();
 
                         Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("Registrazione completata");
                         Console.ForegroundColor = ConsoleColor.White;
-
                     }
                     catch (Exception ex)
                     {
+                        Console.Clear();
+
                         errorLog = new Utility.ErrorLog
-                            (
+                        (
                             errorLog.ClassName = this.GetType().Name, errorLog.MethodName = MethodBase.GetCurrentMethod().Name, errorLog.DateTimeLog = DateTime.Now,
                             errorLog.ErrorCode = ex.HResult, errorLog.ErrorMessage = ex.Message, errorLog.InnerExcept = ex.InnerException != null ? ex.InnerException.ToString() : ""
-                            );
-                        errorLog.WriteErrorEvent( errorLog );
+                        );
+                        errorLog.WriteErrorEvent(errorLog, errorLogPath);
                         Console.WriteLine($"è stato riscontrato il seguente errore: {ex.Message}");
                     }
-
-                    Console.Clear();
-
-
                     close = true;
                 }
             }
-
-
         }
     }
 }
+

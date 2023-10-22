@@ -111,71 +111,91 @@ namespace EsercizioLogin.User
                 if (userTryRegister != null)
                 {
                     Console.Clear();
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Questo nome utente esiste già, riprova");
-                    Console.ForegroundColor = ConsoleColor.White;
+                    utility.errorStyle("Questo nome utente esiste già, riprova");
+                }
+                else if (userNameChoose.Length < 3)
+                {
+                    Console.Clear();
+                    utility.errorStyle("Il nome deve essere lungo almeno 3 caratteri");
+                }
+                else if (userNameChoose.Length > 20)
+                {
+                    Console.Clear();
+                    utility.errorStyle("Il nome non può essere lungo più di 20 caratteri");
                 }
                 else
                 {
                     Console.Clear();
+                    while (!close)
+                    {
                     Console.WriteLine("Scegli una password");
                     string userPasswordChoose = Console.ReadLine();
 
-                    string encPasswordChoose = passwordGen.PasswordEnc(userPasswordChoose);
-                    int userId;
-
-                    if (listUsers.Count > 0)
+                    if(userPasswordChoose.Length < 5 )
                     {
-                        userId = listUsers[listUsers.Count - 1].id + 1;
-                    }
+                        Console.Clear();
+                        utility.errorStyle("Scegli una password più efficace"); 
+                    } 
                     else
-                    {
-                        userId = 1;
-                    }
-
-                    User user = new User(userId, userNameChoose, encPasswordChoose);
-
-                    try
-                    {
-                        listUsers.Add(user);
-                        XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
-
-                        if (File.Exists(filePath))
                         {
-                            using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
-                            {
-                                serializer.Serialize(sw, listUsers);
-                            }
+                        string encPasswordChoose = passwordGen.PasswordEnc(userPasswordChoose);
+                        int userId;
+
+                        if (listUsers.Count > 0)
+                        {
+                            userId = listUsers[listUsers.Count - 1].id + 1;
                         }
                         else
                         {
-                            using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
-                            {
-                                serializer.Serialize(sw, listUsers);
-                            }
+                            userId = 1;
                         }
 
-                        Utility.DataLog dataLog = new Utility.DataLog(this.GetType().Name, MethodBase.GetCurrentMethod().Name, DateTime.Now);
-                        utility.WriteDataEvent(dataLog, registerLog, userNameChoose);
-                        Console.Clear();
+                        User user = new User(userId, userNameChoose, encPasswordChoose);
 
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("Registrazione completata");
-                        Console.ForegroundColor = ConsoleColor.White;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.Clear();
+                        try
+                        {
+                            listUsers.Add(user);
+                            XmlSerializer serializer = new XmlSerializer(typeof(List<User>));
 
-                        errorLog = new Utility.ErrorLog
-                        (
-                            errorLog.ClassName = this.GetType().Name, errorLog.MethodName = MethodBase.GetCurrentMethod().Name, errorLog.DateTimeLog = DateTime.Now,
-                            errorLog.ErrorCode = ex.HResult, errorLog.ErrorMessage = ex.Message, errorLog.InnerExcept = ex.InnerException != null ? ex.InnerException.ToString() : ""
-                        );
-                        errorLog.WriteErrorEvent(errorLog, errorLogPath);
-                        Console.WriteLine($"è stato riscontrato il seguente errore: {ex.Message}");
+                            if (File.Exists(filePath))
+                            {
+                                using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
+                                {
+                                    serializer.Serialize(sw, listUsers);
+                                }
+                            }
+                            else
+                            {
+                                using (StreamWriter sw = new($"{relPath}\\DataUser\\userList.xml"))
+                                {
+                                    serializer.Serialize(sw, listUsers);
+                                }
+                            }
+
+                            Utility.DataLog dataLog = new Utility.DataLog(this.GetType().Name, MethodBase.GetCurrentMethod().Name, DateTime.Now);
+                            utility.WriteDataEvent(dataLog, registerLog, userNameChoose);
+                            Console.Clear();
+
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("Registrazione completata");
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Clear();
+
+                            errorLog = new Utility.ErrorLog
+                            (
+                                errorLog.ClassName = this.GetType().Name, errorLog.MethodName = MethodBase.GetCurrentMethod().Name, errorLog.DateTimeLog = DateTime.Now,
+                                errorLog.ErrorCode = ex.HResult, errorLog.ErrorMessage = ex.Message, errorLog.InnerExcept = ex.InnerException != null ? ex.InnerException.ToString() : ""
+                            );
+                            errorLog.WriteErrorEvent(errorLog, errorLogPath);
+                            Console.WriteLine($"è stato riscontrato il seguente errore: {ex.Message}");
+                        }
+                        close = true;
+
+                        }
                     }
-                    close = true;
                 }
             }
         }
